@@ -1,15 +1,10 @@
 import streamlit as st
 import pandas as pd
 import os
-
-# =====================================================
-# CONFIG
-# =====================================================
 st.set_page_config(
     page_title="Aadhaar Update Pressure Intelligence",
     layout="wide"
 )
-
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 OUTPUT_DIR = os.path.join(ROOT_DIR, "outputs")
 UPI_PATH = os.path.join(OUTPUT_DIR, "district_update_pressure_index.csv")
@@ -25,16 +20,8 @@ def pretty_district(name):
                 .replace("–", " - ")
         )
     return name
-
-# =====================================================
-# PAGE STATE
-# =====================================================
 if "page" not in st.session_state:
     st.session_state.page = "district_view"
-
-# =====================================================
-# LOAD DATA
-# =====================================================
 @st.cache_data
 def load_data():
     if not os.path.exists(UPI_PATH):
@@ -43,10 +30,6 @@ def load_data():
     return pd.read_csv(UPI_PATH)
 
 df = load_data()
-
-# =====================================================
-# HEADER
-# =====================================================
 st.title("🆔 Aadhaar Update Pressure & Data Quality Intelligence System")
 
 st.markdown("""
@@ -55,19 +38,11 @@ st.markdown("""
 This system identifies **where**, **why**, and **how urgently**
 Aadhaar update demand is building — using age-aware, region-wise signals.
 """)
-
-# =====================================================
-# TOP ACTION BUTTON
-# =====================================================
 col_main, col_action = st.columns([6, 2])
 
 with col_action:
     if st.button("🚨 National Pressure Ranking"):
         st.session_state.page = "ranking_view"
-
-# =====================================================
-# DISTRICT VIEW (DEFAULT)
-# =====================================================
 if st.session_state.page == "district_view":
 
     st.sidebar.header("🔎 Filter Region")
@@ -130,10 +105,6 @@ if st.session_state.page == "district_view":
         df_state_display.sort_values("upi", ascending=False),
         use_container_width=True
     )
-
-# =====================================================
-# ADMIN RANKING VIEW
-# =====================================================
 elif st.session_state.page == "ranking_view":
 
     st.subheader("🚨 National Aadhaar Update Pressure Ranking")
@@ -172,17 +143,12 @@ elif st.session_state.page == "ranking_view":
         use_container_width=True,
         height=550
     )
-
     st.markdown("""
     **How to use**
     - Focus on CRITICAL and HIGH pressure districts
     - Deploy capacity proactively
     - Avoid reactive firefighting
     """)
-
-# =====================================================
-# FOOTER
-# =====================================================
 st.markdown("---")
 st.caption("""
 ⚠️ Advisory analytics only.  

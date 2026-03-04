@@ -1,9 +1,5 @@
 import os
 import pandas as pd
-
-# ======================
-# PATHS
-# ======================
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 OUTPUT_DIR = os.path.join(ROOT_DIR, "outputs")
 
@@ -12,10 +8,6 @@ DEMO_PATH = os.path.join(OUTPUT_DIR, "demographic_clean.csv")
 BIO_PATH = os.path.join(OUTPUT_DIR, "biometric_clean.csv")
 
 OUT_PATH = os.path.join(OUTPUT_DIR, "district_update_pressure_index.csv")
-
-# ======================
-# LOAD CLEAN DATA
-# ======================
 print("Loading clean datasets...")
 
 enrol = pd.read_csv(ENROL_PATH)
@@ -23,10 +15,6 @@ demo = pd.read_csv(DEMO_PATH)
 bio = pd.read_csv(BIO_PATH)
 
 print("✓ Clean CSVs loaded")
-
-# ======================
-# ALIGN AGE GROUPS
-# ======================
 def align_age_groups(df, kind):
     if kind == "enrolment":
         df["child"] = df["age_0_5"]
@@ -56,10 +44,6 @@ print("Aligning age groups...")
 enrol_a = align_age_groups(enrol, "enrolment")
 demo_a = align_age_groups(demo, "demographic")
 bio_a = align_age_groups(bio, "biometric")
-
-# ======================
-# AGGREGATE TO DISTRICT
-# ======================
 def district_sum(df):
     return df.groupby(
         ["state_normalized", "district_cleaned"],
@@ -85,10 +69,6 @@ bio_d = district_sum(bio_a).rename(columns={
 })
 
 print("✓ District aggregation complete")
-
-# ======================
-# MERGE ALL SIGNALS
-# ======================
 df = (
     enrol_d
     .merge(demo_d, on=["state_normalized", "district_cleaned"], how="left")
@@ -97,10 +77,6 @@ df = (
 )
 
 print("✓ Unified analytical table created")
-
-# ======================
-# CORE METRICS
-# ======================
 df["total_enrolment"] = (
     df["enrol_child"] +
     df["enrol_youth"] +
@@ -130,16 +106,8 @@ df["biometric_ratio"] = (
     (df["bio_youth"] + df["bio_adult"]) /
     (df["total_updates"] + 1)
 )
-
-# ======================
-# NORMALIZATION
-# ======================
 def normalize(series):
     return (series - series.min()) / (series.max() - series.min() + 1e-6)
-
-# ======================
-# UPDATE PRESSURE INDEX
-# ======================
 df["upi"] = (
     0.4 * normalize(df["update_intensity"]) +
     0.3 * normalize(df["youth_pressure"]) +
@@ -158,10 +126,6 @@ def pressure_level(x):
         return "LOW"
 
 df["pressure_level"] = df["upi"].apply(pressure_level)
-
-# ======================
-# SAVE OUTPUT
-# ======================
 df.to_csv(OUT_PATH, index=False)
 
 print("====================================")
